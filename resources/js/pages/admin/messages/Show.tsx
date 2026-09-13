@@ -3,6 +3,8 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardContent } from '@/components/ui/glass-card';
 import { ArrowLeft, Trash2, Mail, Calendar, User } from 'lucide-react';
+import { useState } from 'react';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 
 export default function MessageShow({ message }: any) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -11,10 +13,10 @@ export default function MessageShow({ message }: any) {
         { title: 'View Message', href: '#' },
     ];
 
-    const handleDelete = () => {
-        if (confirm('Are you sure you want to delete this message?')) {
-            router.delete(`/admin/messages/${message.id}`);
-        }
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const executeDelete = () => {
+        router.delete(`/admin/messages/${message.id}`);
     };
 
     return (
@@ -32,7 +34,7 @@ export default function MessageShow({ message }: any) {
                         </h1>
                     </div>
                     <button 
-                        onClick={handleDelete}
+                        onClick={() => setShowDeleteConfirm(true)}
                         className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-500 px-4 py-2 rounded-md font-medium transition-all"
                     >
                         <Trash2 className="w-4 h-4" />
@@ -92,6 +94,14 @@ export default function MessageShow({ message }: any) {
                     </GlassCardContent>
                 </GlassCard>
             </div>
+
+            <ConfirmModal 
+                isOpen={showDeleteConfirm} 
+                onClose={() => setShowDeleteConfirm(false)} 
+                onConfirm={executeDelete} 
+                title="Delete Message"
+                message="Are you sure you want to delete this message? This action cannot be undone."
+            />
         </AppLayout>
     );
 }

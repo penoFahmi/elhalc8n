@@ -9,11 +9,27 @@ use Inertia\Inertia;
 
 class ExperienceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $experiences = Experience::orderBy('order_number', 'asc')->get();
+        $query = Experience::orderBy('start_date', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('institution', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->input('type'));
+        }
+
+        $experiences = $query->paginate(10)->withQueryString();
+
         return Inertia::render('admin/experiences/Index', [
-            'experiences' => $experiences
+            'experiences' => $experiences,
+            'filters' => $request->only(['search', 'type'])
         ]);
     }
 

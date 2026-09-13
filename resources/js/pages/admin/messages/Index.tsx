@@ -3,17 +3,41 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardContent } from '@/components/ui/glass-card';
 import { GlassTable, GlassTableHeader, GlassTableRow, GlassTableHead, GlassTableBody, GlassTableCell } from '@/components/ui/glass-table';
-import { Trash2, Eye } from 'lucide-react';
+import { Trash2, Eye, Search } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { Pagination } from '@/components/ui/pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Messages', href: '/admin/messages' },
 ];
 
-export default function MessageIndex({ messages, flash }: any) {
-    const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this message?')) {
-            router.delete(`/admin/messages/${id}`);
+export default function MessageIndex({ messages, filters, flash }: any) {
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [search, setSearch] = useState(filters?.search || '');
+    const [status, setStatus] = useState(filters?.status || '');
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        const timer = setTimeout(() => {
+            router.get('/admin/messages', { search, status }, { preserveState: true, preserveScroll: true, replace: true });
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [search, status]);
+
+    const confirmDelete = (id: number) => {
+        setDeleteId(id);
+    };
+
+    const executeDelete = () => {
+        if (deleteId) {
+            router.delete(`/admin/messages/${deleteId}`);
+            setDeleteId(null);
         }
     };
 
@@ -22,14 +46,32 @@ export default function MessageIndex({ messages, flash }: any) {
             <Head title="Messages | Elhalc8n OS" />
             
             <div className="flex flex-col gap-6 p-4 sm:p-6 w-full max-w-7xl mx-auto">
-                {flash?.success && (
-                    <div className="bg-[#00FF41]/10 border border-[#00FF41]/30 text-[#00FF41] p-4 rounded-xl backdrop-blur-sm">
-                        {flash.success}
-                    </div>
-                )}
+
 
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold text-white tracking-wide">Inbox</h1>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 mb-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search name, email, or subject..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 rounded-md pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF41]/50 transition-colors"
+                        />
+                    </div>
+                    <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="bg-black/40 border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF41]/50 transition-colors"
+                    >
+                        <option value="">All Statuses</option>
+                        <option value="unread">Unread</option>
+                        <option value="read">Read</option>
+                    </select>
                 </div>
 
                 <GlassCard>
@@ -48,14 +90,14 @@ export default function MessageIndex({ messages, flash }: any) {
                                 </GlassTableRow>
                             </GlassTableHeader>
                             <GlassTableBody>
-                                {messages.length === 0 ? (
+                                {messages.data.length === 0 ? (
                                     <GlassTableRow>
                                         <GlassTableCell colSpan={5} className="text-center py-8 text-gray-500">
                                             No messages found.
                                         </GlassTableCell>
                                     </GlassTableRow>
                                 ) : (
-                                    messages.map((msg: any) => (
+                                    messages.data.map((msg: any) => (
                                         <GlassTableRow key={msg.id} className={!msg.is_read ? 'bg-white/5' : ''}>
                                             <GlassTableCell>
                                                 {!msg.is_read ? (
@@ -81,7 +123,7 @@ export default function MessageIndex({ messages, flash }: any) {
                                                     <Link href={`/admin/messages/${msg.id}`} className="p-2 hover:bg-white/10 rounded transition-colors text-blue-400">
                                                         <Eye className="w-4 h-4" />
                                                     </Link>
-                                                    <button onClick={() => handleDelete(msg.id)} className="p-2 hover:bg-white/10 rounded transition-colors text-red-500">
+                                                    <button onClick={() => confirmDelete(msg.id)} className="p-2 hover:bg-white/10 rounded transition-colors text-red-500">
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
@@ -93,7 +135,17 @@ export default function MessageIndex({ messages, flash }: any) {
                         </GlassTable>
                     </GlassCardContent>
                 </GlassCard>
+
+                <Pagination links={messages.links} />
             </div>
+
+            <ConfirmModal 
+                isOpen={deleteId !== null} 
+                onClose={() => setDeleteId(null)} 
+                onConfirm={executeDelete} 
+                title="Delete Message"
+                message="Are you sure you want to delete this message? This action cannot be undone."
+            />
         </AppLayout>
     );
 }

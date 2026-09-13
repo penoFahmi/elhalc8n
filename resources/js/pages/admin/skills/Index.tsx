@@ -3,17 +3,40 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import { GlassCard, GlassCardHeader, GlassCardTitle, GlassCardContent } from '@/components/ui/glass-card';
 import { GlassTable, GlassTableHeader, GlassTableRow, GlassTableHead, GlassTableBody, GlassTableCell } from '@/components/ui/glass-table';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { Plus, Trash2, Edit, Search } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { Pagination } from '@/components/ui/pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Skills', href: '/admin/skills' },
 ];
 
-export default function SkillIndex({ skills, flash }: any) {
-    const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this skill?')) {
-            router.delete(`/admin/skills/${id}`);
+export default function SkillIndex({ skills, filters, flash }: any) {
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [search, setSearch] = useState(filters?.search || '');
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        const timer = setTimeout(() => {
+            router.get('/admin/skills', { search }, { preserveState: true, preserveScroll: true, replace: true });
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const confirmDelete = (id: number) => {
+        setDeleteId(id);
+    };
+
+    const executeDelete = () => {
+        if (deleteId) {
+            router.delete(`/admin/skills/${deleteId}`);
+            setDeleteId(null);
         }
     };
 
@@ -22,16 +45,7 @@ export default function SkillIndex({ skills, flash }: any) {
             <Head title="Skills CMS | Elhalc8n OS" />
             
             <div className="flex flex-col gap-6 p-4 sm:p-6 w-full max-w-7xl mx-auto">
-                {flash?.success && (
-                    <div className="bg-[#00FF41]/10 border border-[#00FF41]/30 text-[#00FF41] p-4 rounded-xl backdrop-blur-sm">
-                        {flash.success}
-                    </div>
-                )}
-                {flash?.error && (
-                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl backdrop-blur-sm">
-                        {flash.error}
-                    </div>
-                )}
+
 
                 <div className="flex justify-between items-center">
                     <h1 className="text-2xl font-bold text-white tracking-wide">Skills Management</h1>
@@ -42,6 +56,19 @@ export default function SkillIndex({ skills, flash }: any) {
                         <Plus className="w-4 h-4" />
                         New Skill
                     </Link>
+                </div>
+
+                <div className="flex mb-2">
+                    <div className="relative w-full sm:w-1/2">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search skills or categories..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 rounded-md pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF41]/50 transition-colors"
+                        />
+                    </div>
                 </div>
 
                 <GlassCard>
@@ -60,14 +87,14 @@ export default function SkillIndex({ skills, flash }: any) {
                                 </GlassTableRow>
                             </GlassTableHeader>
                             <GlassTableBody>
-                                {skills.length === 0 ? (
+                                {skills.data.length === 0 ? (
                                     <GlassTableRow>
                                         <GlassTableCell colSpan={5} className="text-center py-8 text-gray-500">
-                                            No skills found. Create one.
+                                            No skills found.
                                         </GlassTableCell>
                                     </GlassTableRow>
                                 ) : (
-                                    skills.map((skill: any) => (
+                                    skills.data.map((skill: any) => (
                                         <GlassTableRow key={skill.id}>
                                             <GlassTableCell>{skill.order_number}</GlassTableCell>
                                             <GlassTableCell className="font-medium text-white">{skill.name}</GlassTableCell>
@@ -85,7 +112,7 @@ export default function SkillIndex({ skills, flash }: any) {
                                                     <Link href={`/admin/skills/${skill.id}/edit`} className="p-2 hover:bg-white/10 rounded transition-colors text-blue-400">
                                                         <Edit className="w-4 h-4" />
                                                     </Link>
-                                                    <button onClick={() => handleDelete(skill.id)} className="p-2 hover:bg-white/10 rounded transition-colors text-red-500">
+                                                    <button onClick={() => confirmDelete(skill.id)} className="p-2 hover:bg-white/10 rounded transition-colors text-red-500">
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
@@ -97,7 +124,17 @@ export default function SkillIndex({ skills, flash }: any) {
                         </GlassTable>
                     </GlassCardContent>
                 </GlassCard>
+
+                <Pagination links={skills.links} />
             </div>
+
+            <ConfirmModal 
+                isOpen={deleteId !== null} 
+                onClose={() => setDeleteId(null)} 
+                onConfirm={executeDelete} 
+                title="Delete Skill"
+                message="Are you sure you want to delete this skill? This action cannot be undone."
+            />
         </AppLayout>
     );
 }

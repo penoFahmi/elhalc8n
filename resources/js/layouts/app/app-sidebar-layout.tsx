@@ -2,6 +2,7 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { Toaster } from '@/components/ui/toaster';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppSidebarLayout({
@@ -22,6 +23,7 @@ export default function AppSidebarLayout({
                     </div>
                 </AppContent>
             </AppShell>
+            <Toaster />
         </div>
     );
 }

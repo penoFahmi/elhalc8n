@@ -12,11 +12,27 @@ use Illuminate\Support\Str;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $projects = Project::with('category', 'skills')->orderBy('updated_at', 'desc')->get();
+        $query = Project::with('category', 'skills')->orderBy('updated_at', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        $projects = $query->paginate(10)->withQueryString();
+
         return Inertia::render('admin/projects/Index', [
-            'projects' => $projects
+            'projects' => $projects,
+            'filters' => $request->only(['search', 'status'])
         ]);
     }
 

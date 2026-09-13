@@ -9,11 +9,23 @@ use Inertia\Inertia;
 
 class SkillController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $skills = Skill::orderBy('order_number', 'asc')->get();
+        $query = Skill::orderBy('order_number', 'asc');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%");
+            });
+        }
+
+        $skills = $query->paginate(10)->withQueryString();
+
         return Inertia::render('admin/skills/Index', [
-            'skills' => $skills
+            'skills' => $skills,
+            'filters' => $request->only(['search'])
         ]);
     }
 
