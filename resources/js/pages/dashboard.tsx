@@ -13,7 +13,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ stats, recentMessages, systemLogs }: any) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard | Elhalc8n OS" />
@@ -26,8 +26,8 @@ export default function Dashboard() {
                             <Briefcase className="h-4 w-4 text-[#00FF41]" />
                         </GlassCardHeader>
                         <GlassCardContent>
-                            <div className="text-2xl font-bold text-white">12</div>
-                            <p className="text-xs text-muted-foreground mt-1">+2 from last month</p>
+                            <div className="text-2xl font-bold text-white">{stats.totalProjects}</div>
+                            <p className="text-xs text-muted-foreground mt-1">Managed via CMS</p>
                         </GlassCardContent>
                     </GlassCard>
 
@@ -37,8 +37,8 @@ export default function Dashboard() {
                             <Star className="h-4 w-4 text-[#00FF41]" />
                         </GlassCardHeader>
                         <GlassCardContent>
-                            <div className="text-2xl font-bold text-white">24</div>
-                            <p className="text-xs text-muted-foreground mt-1">Across 4 categories</p>
+                            <div className="text-2xl font-bold text-white">{stats.totalSkills}</div>
+                            <p className="text-xs text-muted-foreground mt-1">Available in database</p>
                         </GlassCardContent>
                     </GlassCard>
 
@@ -48,7 +48,7 @@ export default function Dashboard() {
                             <MessageSquare className="h-4 w-4 text-[#00FF41]" />
                         </GlassCardHeader>
                         <GlassCardContent>
-                            <div className="text-2xl font-bold text-white">3</div>
+                            <div className="text-2xl font-bold text-white">{stats.unreadMessages}</div>
                             <p className="text-xs text-muted-foreground mt-1">Need your attention</p>
                         </GlassCardContent>
                     </GlassCard>
@@ -59,7 +59,7 @@ export default function Dashboard() {
                             <Activity className="h-4 w-4 text-[#00FF41]" />
                         </GlassCardHeader>
                         <GlassCardContent>
-                            <div className="text-2xl font-bold text-[#00FF41]">ONLINE</div>
+                            <div className="text-2xl font-bold text-[#00FF41]">{stats.systemStatus}</div>
                             <p className="text-xs text-muted-foreground mt-1">All services nominal</p>
                         </GlassCardContent>
                     </GlassCard>
@@ -83,14 +83,24 @@ export default function Dashboard() {
                                         </GlassTableRow>
                                     </GlassTableHeader>
                                     <GlassTableBody>
-                                        {[1,2,3].map(i => (
-                                            <GlassTableRow key={i}>
-                                                <GlassTableCell className="font-medium text-white">Guest User {i}</GlassTableCell>
-                                                <GlassTableCell>guest{i}@example.com</GlassTableCell>
-                                                <GlassTableCell>Today</GlassTableCell>
-                                                <GlassTableCell className="text-right text-[#00FF41]">Unread</GlassTableCell>
+                                        {recentMessages.length === 0 ? (
+                                            <GlassTableRow>
+                                                <GlassTableCell colSpan={4} className="text-center py-4 text-gray-500">
+                                                    No recent messages
+                                                </GlassTableCell>
                                             </GlassTableRow>
-                                        ))}
+                                        ) : (
+                                            recentMessages.map((msg: any) => (
+                                                <GlassTableRow key={msg.id}>
+                                                    <GlassTableCell className="font-medium text-white">{msg.name}</GlassTableCell>
+                                                    <GlassTableCell>{msg.email}</GlassTableCell>
+                                                    <GlassTableCell>{new Date(msg.created_at).toLocaleDateString()}</GlassTableCell>
+                                                    <GlassTableCell className={`text-right ${msg.is_read ? 'text-gray-400' : 'text-[#00FF41]'}`}>
+                                                        {msg.is_read ? 'Read' : 'Unread'}
+                                                    </GlassTableCell>
+                                                </GlassTableRow>
+                                            ))
+                                        )}
                                     </GlassTableBody>
                                 </GlassTable>
                             </GlassCardContent>
@@ -104,11 +114,7 @@ export default function Dashboard() {
                             </GlassCardHeader>
                             <GlassCardContent>
                                 <div className="space-y-4">
-                                    {[
-                                        { time: '10:42 AM', log: 'Admin logged in from 192.168.1.1' },
-                                        { time: '09:15 AM', log: 'Project "Elhalc8n OS" updated' },
-                                        { time: 'Yesterday', log: 'New message received from Jane Doe' }
-                                    ].map((item, i) => (
+                                    {systemLogs.map((item: any, i: number) => (
                                         <div key={i} className="flex flex-col gap-1 border-b border-[#00FF41]/10 pb-2 last:border-0">
                                             <span className="text-[#FFB000] text-xs">{item.time}</span>
                                             <span className="text-gray-300 text-sm">{item.log}</span>

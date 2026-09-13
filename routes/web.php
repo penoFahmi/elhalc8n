@@ -10,6 +10,9 @@ use App\Models\Setting;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\Experience;
+use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\ExperienceController;
+use App\Http\Controllers\Admin\MessageController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -21,12 +24,15 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+use App\Http\Controllers\DashboardController;
+
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('projects', ProjectController::class);
+    Route::resource('skills', SkillController::class);
+    Route::resource('experiences', ExperienceController::class);
+    Route::resource('messages', MessageController::class)->only(['index', 'show', 'destroy']);
     Route::post('github-sync', [GithubSyncController::class, 'sync'])->name('github.sync');
 });
 
