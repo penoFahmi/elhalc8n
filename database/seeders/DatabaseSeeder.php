@@ -15,10 +15,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::create([
-            'name' => 'Admin Elhac8n',
-            'email' => 'admin@elhac8n.space',
+            'name' => 'Elhalc8n',
+            'email' => 'admin@elhalc8n.space',
             'password' => Hash::make('PasswordKuat123!'),
             'email_verified_at' => now(),
+        ]);
+
+        $this->call([
+            PortfolioSeeder::class,
         ]);
     }
 }
