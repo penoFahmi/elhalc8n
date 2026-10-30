@@ -58,15 +58,15 @@ export default function SkillIndex({ skills, filters, flash }: any) {
                     </Link>
                 </div>
 
-                <div className="flex mb-2">
-                    <div className="relative w-full sm:w-1/2">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <div className="bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-md mb-4 shadow-lg">
+                    <div className="relative w-full">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search skills or categories..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-md pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF41]/50 transition-colors"
+                            className="w-full bg-black/40 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00FF41]/30 focus:border-[#00FF41]/50 transition-all shadow-inner"
                         />
                     </div>
                 </div>

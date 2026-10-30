@@ -55,10 +55,16 @@ class ProjectController extends Controller
             'status' => 'required|in:draft,published',
             'repo_url' => 'nullable|url',
             'demo_url' => 'nullable|url',
+            'thumbnail' => 'nullable|image|max:5120',
         ]);
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']) . '-' . uniqid();
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('projects', 'public');
+            $validated['thumbnail_url'] = '/storage/' . $path;
         }
 
         $project = Project::create($validated);
@@ -90,7 +96,15 @@ class ProjectController extends Controller
             'status' => 'required|in:draft,published',
             'repo_url' => 'nullable|url',
             'demo_url' => 'nullable|url',
+            'thumbnail' => 'nullable|image|max:5120',
         ]);
+
+        if ($request->hasFile('thumbnail')) {
+            // Optional: delete old thumbnail if exists
+            // if ($project->thumbnail_url) { ... }
+            $path = $request->file('thumbnail')->store('projects', 'public');
+            $validated['thumbnail_url'] = '/storage/' . $path;
+        }
 
         $project->update($validated);
 

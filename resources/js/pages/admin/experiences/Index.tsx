@@ -59,26 +59,31 @@ export default function ExperienceIndex({ experiences, filters, flash }: any) {
                     </Link>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 mb-2">
+                <div className="bg-white/5 border border-white/10 p-3 rounded-2xl backdrop-blur-md flex flex-col sm:flex-row gap-3 mb-4 shadow-lg">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search title or institution..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-md pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF41]/50 transition-colors"
+                            className="w-full bg-black/40 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00FF41]/30 focus:border-[#00FF41]/50 transition-all shadow-inner"
                         />
                     </div>
-                    <select
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
-                        className="bg-black/40 border border-white/10 rounded-md px-4 py-2 text-sm text-white focus:outline-none focus:border-[#00FF41]/50 transition-colors"
-                    >
-                        <option value="">All Types</option>
-                        <option value="work">Work</option>
-                        <option value="education">Education</option>
-                    </select>
+                    <div className="relative w-full sm:w-48">
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="w-full appearance-none bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 pr-10 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#00FF41]/30 focus:border-[#00FF41]/50 transition-all shadow-inner cursor-pointer"
+                        >
+                            <option value="" className="bg-gray-900">All Types</option>
+                            <option value="work" className="bg-gray-900">Work</option>
+                            <option value="education" className="bg-gray-900">Education</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                            <svg className="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                        </div>
+                    </div>
                 </div>
 
                 <GlassCard>

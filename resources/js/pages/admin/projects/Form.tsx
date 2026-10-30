@@ -22,13 +22,15 @@ export default function ProjectForm({ project, categories, skills }: any) {
         status: project?.status || 'draft',
         repo_url: project?.repo_url || '',
         demo_url: project?.demo_url || '',
+        thumbnail: null as File | null,
+        _method: isEdit ? 'put' : 'post',
         skills: project?.skills?.map((s: any) => s.id) || [],
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         if (isEdit) {
-            put(`/admin/projects/${project.id}`);
+            post(`/admin/projects/${project.id}`);
         } else {
             post('/admin/projects');
         }
@@ -114,6 +116,23 @@ export default function ProjectForm({ project, categories, skills }: any) {
                                         placeholder="https://..."
                                     />
                                 </div>
+                            </div>
+
+                            {/* Thumbnail Upload */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-sm font-medium text-[#00FF41]">Project Thumbnail</label>
+                                {project?.thumbnail_url && (
+                                    <div className="mb-2">
+                                        <img src={project.thumbnail_url} alt="Current thumbnail" className="h-32 rounded border border-white/20 object-cover" />
+                                    </div>
+                                )}
+                                <input 
+                                    type="file" 
+                                    accept="image/*"
+                                    onChange={e => setData('thumbnail', e.target.files ? e.target.files[0] : null)}
+                                    className="bg-black/40 border border-white/10 rounded p-2 text-white focus:outline-none focus:border-[#00FF41]/50 transition-colors file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#00FF41] file:text-black hover:file:bg-[#00cc33] cursor-pointer"
+                                />
+                                {errors.thumbnail && <span className="text-red-500 text-xs">{errors.thumbnail}</span>}
                             </div>
 
                             {/* Content / Description */}
